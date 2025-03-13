@@ -1,49 +1,113 @@
-const gameArea = document.getElementById('game-area');
-const shooter = document.getElementById('shooter');
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
 
-// Function to create a ball and shoot it towards the mouse position
-function shootBall(event) {
-  const ball = document.createElement('div');
-  ball.classList.add('ball');
-  gameArea.appendChild(ball);
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-  // Get mouse position
-  const mouseX = event.clientX;
-  const mouseY = event.clientY;
+const zombieImage = new Image();
+zombieImage.src = 'zombie.png'; // You need to provide a zombie image
 
-  // Get shooter position
-  const shooterRect = shooter.getBoundingClientRect();
-  const shooterX = shooterRect.left + shooterRect.width / 2;
-  const shooterY = shooterRect.top + shooterRect.height / 2;
+const bulletImage = new Image();
+bulletImage.src = 'bullet.png'; // You need to provide a bullet image
 
-  // Calculate direction
-  const deltaX = mouseX - shooterX;
-  const deltaY = mouseY - shooterY;
-  const angle = Math.atan2(deltaY, deltaX);
+let zombies = [];
+let bullets = [];
 
-  // Set initial position of the ball
-  ball.style.left = `${shooterX}px`;
-  ball.style.top = `${shooterY}px`;
-
-  // Move the ball
-  const speed = 5;
-  const ballSize = 20; // Diameter of the ball
-  let posX = shooterX;
-  let posY = shooterY;
-
-  const interval = setInterval(() => {
-    posX += Math.cos(angle) * speed;
-    posY += Math.sin(angle) * speed;
-    ball.style.left = `${posX}px`;
-    ball.style.top = `${posY}px`;
-
-    // Remove the ball when it goes out of the screen
-    if (posX < -ballSize || posX > window.innerWidth || posY < -ballSize || posY > window.innerHeight) {
-      clearInterval(interval);
-      ball.remove();
+class Zombie {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 50;
+        this.height = 50;
+        this.health = 2;
     }
-  }, 20);
+
+    draw() {
+        ctx.drawImage(zombieImage, this.x, this.y, this.width, this.height);
+    }
+
+    update() {
+        this.x += (Math.random() - 0.5) * 2;
+        this.y += (Math.random() - 0.5) * 2;
+    }
 }
 
-// Add event listener for mouse clicks
-document.addEventListener('click', shootBall);
+class Bullet {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.width = 10;
+        this.height = 10;
+    }
+
+    draw() {
+        ctx.drawImage(bulletImage, this.x, this.y, this.width, this.height);
+    }
+
+    update() {
+        this.y -= 5;
+    }
+}
+
+function spawnZombie() {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
+    zombies.push(new Zombie(x, y));
+}
+
+function shootBullet(x, y) {
+    bullets.push(new Bullet(x, y));
+}
+
+function checkCollisions() {
+    bullets.forEach((bullet, bulletIndex) => {
+        zombies.forEach((zombie, zombieIndex) => {
+            if (bullet.x < zombie.x + zombie.width &&
+                bullet.x + bullet.width > zombie.x &&
+                bullet.y < zombie.y + zombie.height &&
+                bullet.y + bullet.height > zombie.y) {
+                zombie.health--;
+                bullets.splice(bulletIndex, 1);
+                if (zombie.health <= 0) {
+                    zombies.splice(zombieIndex, 1);
+                    spawnZombie();
+                }
+            }
+        });
+    });
+}
+
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    zombies.forEach(zombie => {
+        zombie.update();
+        zombie.draw();
+    });
+
+    bullets.forEach((bullet, index) => {
+        bullet.update();
+        bullet.draw();
+        if (bullet.y + bullet.height < 0) {
+            bullets.splice(index, 1);
+        }
+    });
+
+    checkCollisions();
+
+    requestAnimationFrame(gameLoop);
+}
+
+canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    shootBullet(x, y);
+});
+
+// Initial spawn
+for (let i = 0; i < 5; i++) {
+    spawnZombie();
+}
+
+gameLoop();
