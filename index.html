@@ -3,111 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clicker Game</title>
+    <title>Complex Clicker Game</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div id="clicker-tile" class="clicker-tile" onclick="incrementClicks()">Click Me!</div>
-        <div id="click-count">0 Clicks</div>
-        <div id="upgrades">Upgrades: None</div>
-        <div id="rebirths">Rebirths: 0</div>
-        <div id="level">Level: 1</div>
+    <div id="game-container">
+        <h1>Complex Clicker Game</h1>
+        <button id="click-button">Click Me!</button>
+        <p id="score">Score: 0</p>
+        <div id="upgrades">
+            <h2>Upgrades</h2>
+            <!-- Upgrades will be dynamically added here -->
+        </div>
+        <div id="achievements">
+            <h2>Achievements</h2>
+            <!-- Achievements will be dynamically added here -->
+        </div>
+        <div id="leaderboard">
+            <h2>Leaderboard</h2>
+            <!-- Leaderboard will be dynamically added here -->
+        </div>
     </div>
-    <script src="script.js"></script>
+    <script src="scripts.js"></script>
 </body>
 </html>
 body {
     background-color: black;
     color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
     font-family: Arial, sans-serif;
-}
-
-.container {
     text-align: center;
+    margin: 0;
+    padding: 0;
 }
 
-#clicker-tile {
-    background-color: #444;
-    border: 2px solid #fff;
+#game-container {
+    width: 80%;
+    margin: 0 auto;
     padding: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 20px;
+    background-color: #444;
+    color: white;
+    border: none;
     cursor: pointer;
-    user-select: none;
-    margin-bottom: 10px;
 }
 
-#clicker-tile:hover {
-    background-color: #555;
+button:hover {
+    background-color: #666;
 }
+let score = 0;
+const clickButton = document.getElementById('click-button');
+const scoreDisplay = document.getElementById('score');
 
-#click-count, #upgrades, #rebirths, #level {
-    margin: 10px 0;
-}
-let clickCount = 0;
-let upgrades = 0;
-let rebirths = 0;
-let level = 1;
-let autoClickerInterval = null;
-
-function incrementClicks(amount = 1) {
-    clickCount += amount;
-    document.getElementById('click-count').innerText = `${clickCount} Clicks`;
-    checkUpgrades();
-    checkRebirth();
-    checkLevelUp();
-}
-
-function startAutoClicker() {
-    if (!autoClickerInterval) {
-        autoClickerInterval = setInterval(() => incrementClicks(20), 50);
-    }
-}
-
-function stopAutoClicker() {
-    if (autoClickerInterval) {
-        clearInterval(autoClickerInterval);
-        autoClickerInterval = null;
-    }
-}
-
-function checkUpgrades() {
-    if (clickCount >= 100000 * (upgrades + 1)) {
-        upgrades++;
-        document.getElementById('upgrades').innerText = `Upgrades: ${upgrades}`;
-    }
-}
-
-function checkRebirth() {
-    if (clickCount >= 100000) {
-        clickCount = 0;
-        upgrades = 0;
-        rebirths++;
-        document.getElementById('click-count').innerText = `${clickCount} Clicks`;
-        document.getElementById('rebirths').innerText = `Rebirths: ${rebirths}`;
-        document.getElementById('upgrades').innerText = 'Upgrades: None';
-    }
-}
-
-function checkLevelUp() {
-    if (clickCount >= 1000000 * level) {
-        level++;
-        document.getElementById('level').innerText = `Level: ${level}`;
-    }
-}
-
-document.addEventListener('keydown', (event) => {
-    if (event.code === 'Space') {
-        startAutoClicker();
-    }
-});
-
-document.addEventListener('keyup', (event) => {
-    if (event.code === 'Space') {
-        stopAutoClicker();
-    }
+clickButton.addEventListener('click', () => {
+    score++;
+    scoreDisplay.textContent = `Score: ${score}`;
 });
