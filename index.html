@@ -1,71 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Shooter Game</title>
-    <style>
-        canvas {
-            border: 1px solid black;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shooter Game</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <script src="game.js"></script>
+  <div id="game-area">
+    <div id="shooter"></div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
+body {
+  margin: 0;
+  overflow: hidden;
+  background-color: #333;
+}
 
+#game-area {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
 
+#shooter {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background-color: red;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
+.ball {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: yellow;
+  border-radius: 50%;
+}
+const gameArea = document.getElementById('game-area');
+const shooter = document.getElementById('shooter');
 
-const canvas = document.getElementById('gameCanvas');
-const context = canvas.getContext('2d');
+// Function to create a ball and shoot it towards the mouse position
+function shootBall(event) {
+  const ball = document.createElement('div');
+  ball.classList.add('ball');
+  gameArea.appendChild(ball);
 
-const balls = [];
-const player = { x: canvas.width / 2, y: canvas.height / 2 };
+  // Get mouse position
+  const mouseX = event.clientX;
+  const mouseY = event.clientY;
 
-canvas.addEventListener('click', (event) => {
-    const angle = Math.atan2(event.clientY - player.y, event.clientX - player.x);
-    const speed = 5;
-    balls.push({
-        x: player.x,
-        y: player.y,
-        dx: Math.cos(angle) * speed,
-        dy: Math.sin(angle) * speed
-    });
-});
+  // Get shooter position
+  const shooterRect = shooter.getBoundingClientRect();
+  const shooterX = shooterRect.left + shooterRect.width / 2;
+  const shooterY = shooterRect.top + shooterRect.height / 2;
 
-function update() {
-    for (let i = 0; i < balls.length; i++) {
-        balls[i].x += balls[i].dx;
-        balls[i].y += balls[i].dy;
+  // Calculate direction
+  const deltaX = mouseX - shooterX;
+  const deltaY = mouseY - shooterY;
+  const angle = Math.atan2(deltaY, deltaX);
 
-        if (balls[i].x < 0 || balls[i].x > canvas.width || balls[i].y < 0 || balls[i].y > canvas.height) {
-            balls.splice(i, 1);
-            i--;
-        }
+  // Set initial position of the ball
+  ball.style.left = `${shooterX}px`;
+  ball.style.top = `${shooterY}px`;
+
+  // Move the ball
+  const speed = 5;
+  const ballSize = 20; // Diameter of the ball
+  let posX = shooterX;
+  let posY = shooterY;
+
+  const interval = setInterval(() => {
+    posX += Math.cos(angle) * speed;
+    posY += Math.sin(angle) * speed;
+    ball.style.left = `${posX}px`;
+    ball.style.top = `${posY}px`;
+
+    // Remove the ball when it goes out of the screen
+    if (posX < -ballSize || posX > window.innerWidth || posY < -ballSize || posY > window.innerHeight) {
+      clearInterval(interval);
+      ball.remove();
     }
+  }, 20);
 }
 
-function draw() {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-
-    context.fillStyle = 'blue';
-    context.fillRect(player.x - 10, player.y - 10, 20, 20); // Draw player
-
-    context.fillStyle = 'red';
-    for (const ball of balls) {
-        context.beginPath();
-        context.arc(ball.x, ball.y, 5, 0, Math.PI * 2);
-        context.fill();
-    }
-}
-
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-gameLoop();
+// Add event listener for mouse clicks
+document.addEventListener('click', shootBall);
