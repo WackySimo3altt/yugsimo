@@ -1,3 +1,4 @@
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -6,6 +7,7 @@ canvas.height = window.innerHeight;
 
 const balls = [];
 const ballSpeed = 5;
+let spacePressed = false;
 
 class Ball {
     constructor(x, y, dx, dy) {
@@ -31,9 +33,9 @@ class Ball {
     }
 }
 
-function shootBall(event) {
-    const mouseX = event.clientX;
-    const mouseY = event.clientY;
+function shootBall() {
+    const mouseX = canvas.width / 2; // Shoot from the center horizontally
+    const mouseY = canvas.height / 2; // Shoot from the center vertically
     const angle = Math.atan2(mouseY - canvas.height / 2, mouseX - canvas.width / 2);
     const dx = Math.cos(angle) * ballSpeed;
     const dy = Math.sin(angle) * ballSpeed;
@@ -45,6 +47,12 @@ function animate() {
     requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Shoot balls if spacebar is pressed
+    if (spacePressed) {
+        shootBall();
+    }
+
+    // Update and draw all balls
     balls.forEach((ball, index) => {
         ball.update();
 
@@ -56,5 +64,17 @@ function animate() {
     });
 }
 
-canvas.addEventListener('click', shootBall);
+// Event listeners for spacebar
+window.addEventListener('keydown', (event) => {
+    if (event.code === 'Space') {
+        spacePressed = true;
+    }
+});
+
+window.addEventListener('keyup', (event) => {
+    if (event.code === 'Space') {
+        spacePressed = false;
+    }
+});
+
 animate();
