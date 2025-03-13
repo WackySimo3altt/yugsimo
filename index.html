@@ -3,62 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Complex Clicker Game</title>
+    <title>Spacebar Clicker Game</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game-container">
-        <h1>Complex Clicker Game</h1>
-        <button id="click-button">Click Me!</button>
-        <p id="score">Score: 0</p>
-        <div id="upgrades">
-            <h2>Upgrades</h2>
-            <!-- Upgrades will be dynamically added here -->
-        </div>
-        <div id="achievements">
-            <h2>Achievements</h2>
-            <!-- Achievements will be dynamically added here -->
-        </div>
-        <div id="leaderboard">
-            <h2>Leaderboard</h2>
-            <!-- Leaderboard will be dynamically added here -->
-        </div>
+    <div class="container">
+        <h1>Spacebar Clicker Game</h1>
+        <p>Press the button to increase your score!</p>
+        <button id="clicker-button">Click me!</button>
+        <p>Score: <span id="score">0</span></p>
     </div>
-    <script src="scripts.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
 body {
-    background-color: black;
-    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f0f0f0;
     font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 0;
-    padding: 0;
 }
 
-#game-container {
-    width: 80%;
-    margin: 0 auto;
+.container {
+    text-align: center;
+    background-color: #fff;
     padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 button {
-    padding: 10px 20px;
     font-size: 20px;
-    background-color: #444;
-    color: white;
-    border: none;
+    padding: 10px 20px;
+    margin-top: 20px;
     cursor: pointer;
 }
-
-button:hover {
-    background-color: #666;
-}
 let score = 0;
-const clickButton = document.getElementById('click-button');
-const scoreDisplay = document.getElementById('score');
 
-clickButton.addEventListener('click', () => {
+document.getElementById('clicker-button').addEventListener('click', () => {
     score++;
-    scoreDisplay.textContent = `Score: ${score}`;
+    document.getElementById('score').innerText = score;
 });
