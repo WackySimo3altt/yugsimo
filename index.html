@@ -3,45 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spacebar Clicker Game</title>
+    <title>Shooter Game</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Spacebar Clicker Game</h1>
-        <p>Press the button to increase your score!</p>
-        <button id="clicker-button">Click me!</button>
-        <p>Score: <span id="score">0</span></p>
-    </div>
+    <canvas id="gameCanvas"></canvas>
     <script src="script.js"></script>
 </body>
 </html>
 body {
+    margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f0f0f0;
-    font-family: Arial, sans-serif;
+    background-color: #000;
 }
 
-.container {
-    text-align: center;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+canvas {
+    border: 1px solid #fff;
+}const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const shooter = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 20,
+    color: 'white'
+};
+
+const balls = [];
+
+function drawShooter() {
+    ctx.beginPath();
+    ctx.arc(shooter.x, shooter.y, shooter.radius, 0, Math.PI * 2, false);
+    ctx.fillStyle = shooter.color;
+    ctx.fill();
+    ctx.closePath();
 }
 
-button {
-    font-size: 20px;
-    padding: 10px 20px;
-    margin-top: 20px;
-    cursor: pointer;
+function shootBall(x, y) {
+    const angle = Math.atan2(y - shooter.y, x - shooter.x);
+    const velocity = {
+        x: Math.cos(angle) * 5,
+        y: Math.sin(angle) * 5
+    };
+    balls.push({
+        x: shooter.x,
+        y: shooter.y,
+        radius: 5,
+        color: 'red',
+        velocity: velocity
+    });
 }
-let score = 0;
 
-document.getElementById('clicker-button').addEventListener('click', () => {
-    score++;
-    document.getElementById('score').innerText = score;
+function drawBalls() {
+    balls.forEach((ball, index) => {
+        ball.x += ball.velocity.x;
+        ball.y += ball.velocity.y;
+
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, false);
+        ctx.fillStyle = ball.color;
+        ctx.fill();
+        ctx.closePath();
+
+        if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width ||
+            ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+            balls.splice(index, 1);
+        }
+    });
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawShooter();
+    drawBalls();
+    requestAnimationFrame(animate);
+}
+
+canvas.addEventListener('click', (event) => {
+    shootBall(event.clientX, event.clientY);
 });
+
+animate();
