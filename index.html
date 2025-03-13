@@ -1,31 +1,70 @@
+{
+  "name": "complex-clicker-game",
+  "version": "1.0.0",
+  "description": "A complex clicker game with upgrades, levels, and rebirths, served over HTTPS.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "http": "^0.0.1-security",
+    "https": "^1.0.0"
+  }
+}
+const express = require('express');
+const http = require('http');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+
+const app = express();
+const PORT = 3000;
+const SSL_PORT = 3443;
+
+const options = {
+  key: fs.readFileSync('key.pem'),
+  cert: fs.readFileSync('cert.pem')
+};
+
+app.use(express.static(path.join(__dirname, 'public')));
+
+http.createServer(app).listen(PORT, () => {
+  console.log(`HTTP server running on port ${PORT}`);
+});
+
+https.createServer(options, app).listen(SSL_PORT, () => {
+  console.log(`HTTPS server running on port ${SSL_PORT}`);
+});
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clicker Game</title>
-    <style>
-        body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f0f0; }
-        #game { text-align: center; }
-        #clickButton { padding: 20px; font-size: 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        #clickButton:hover { background: #45a049; }
-        #score { font-size: 24px; margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complex Clicker Game</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game">
-        <button id="clickButton">Click Me!</button>
-        <div id="score">Score: 0</div>
+  <div id="game">
+    <h1>Complex Clicker Game</h1>
+    <div id="clicker">
+      <button id="click-button">Click Me!</button>
+      <p>Clicks: <span id="click-count">0</span></p>
     </div>
-    <script>
-        let score = 0;
-        const clickButton = document.getElementById('clickButton');
-        const scoreDisplay = document.getElementById('score');
-        
-        clickButton.addEventListener('click', () => {
-            score++;
-            scoreDisplay.textContent = 'Score: ' + score;
-        });
-    </script>
+    <div id="upgrades">
+      <h2>Upgrades</h2>
+      <button id="upgrade-button">Upgrade (Cost: <span id="upgrade-cost">10</span>)</button>
+    </div>
+    <div id="levels">
+      <h2>Levels</h2>
+      <p>Level: <span id="level">1</span></p>
+      <button id="level-up-button">Level Up (Cost: <span id="level-up-cost">100</span>)</button>
+    </div>
+    <div id="rebirth">
+      <h2>Rebirth</h2>
+      <button id="rebirth-button">Rebirth (Cost: <span id="rebirth-cost">1000</span>)</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
