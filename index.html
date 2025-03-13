@@ -35,6 +35,13 @@
       border-radius: 5px;
       cursor: pointer;
     }
+    #level-display {
+      position: absolute;
+      top: 100px;
+      left: 20px;
+      font-size: 20px;
+      color: white;
+    }
   </style>
 </head>
 <body>
@@ -45,6 +52,9 @@
 
   <!-- Start Button -->
   <button id="start-button">Start</button>
+
+  <!-- Level Display -->
+  <div id="level-display">Level: 1</div>
 
   <!-- Use the correct Three.js library URL -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.146.0/three.min.js"></script>
@@ -136,13 +146,17 @@
 
     // Enemies
     const enemies = [];
-    const baseEnemySpeed = 0.02; // Base speed of enemies
+    let baseEnemySpeed = 0.02; // Base speed of enemies
     const enemyGeometry = new THREE.SphereGeometry(0.1, 16, 16);
     const enemyMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
     // Health
     let health = 100;
     const healthBar = document.getElementById('health');
+
+    // Level System
+    let level = 1;
+    const levelDisplay = document.getElementById('level-display');
 
     // Start Button
     const startButton = document.getElementById('start-button');
@@ -161,6 +175,26 @@
     // Update Health Bar
     function updateHealthBar() {
       healthBar.style.width = `${health}%`;
+    }
+
+    // Next Level
+    function nextLevel() {
+      level++;
+      levelDisplay.textContent = `Level: ${level}`;
+
+      // Reset health to full
+      health = 100;
+      updateHealthBar();
+
+      // Increase difficulty
+      baseEnemySpeed += 0.01; // Enemies move faster
+
+      // Clear existing enemies
+      enemies.forEach(enemy => scene.remove(enemy.mesh));
+      enemies.length = 0;
+
+      // Spawn initial enemies for the new level
+      spawnEnemy();
     }
 
     // Render Loop
@@ -187,13 +221,15 @@
           // Enemy reached the end
           scene.remove(enemy.mesh);
           enemies.splice(i, 1);
-          health -= 10; // Subtract health
+
+          // Calculate damage (1.5 times harder per level)
+          const damage = 10 / Math.pow(1.5, level - 1);
+          health -= Math.round(damage); // Round damage to nearest integer
           updateHealthBar();
 
           if (health <= 0) {
-            alert("Game Over!");
-            health = 100;
-            updateHealthBar();
+            alert(`Next Level: ${level + 1}`);
+            nextLevel();
           }
         }
       }
