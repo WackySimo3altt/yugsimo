@@ -3,90 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shooter Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Simple Shooter Game</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <script src="script.js"></script>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <script src="game.js"></script>
 </body>
 </html>
-body {
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #000;
-}
 
-canvas {
-    border: 1px solid #fff;
-}const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
 
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
 
-const shooter = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    radius: 20,
-    color: 'white'
-};
+
+const canvas = document.getElementById('gameCanvas');
+const context = canvas.getContext('2d');
 
 const balls = [];
-
-function drawShooter() {
-    ctx.beginPath();
-    ctx.arc(shooter.x, shooter.y, shooter.radius, 0, Math.PI * 2, false);
-    ctx.fillStyle = shooter.color;
-    ctx.fill();
-    ctx.closePath();
-}
-
-function shootBall(x, y) {
-    const angle = Math.atan2(y - shooter.y, x - shooter.x);
-    const velocity = {
-        x: Math.cos(angle) * 5,
-        y: Math.sin(angle) * 5
-    };
-    balls.push({
-        x: shooter.x,
-        y: shooter.y,
-        radius: 5,
-        color: 'red',
-        velocity: velocity
-    });
-}
-
-function drawBalls() {
-    balls.forEach((ball, index) => {
-        ball.x += ball.velocity.x;
-        ball.y += ball.velocity.y;
-
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2, false);
-        ctx.fillStyle = ball.color;
-        ctx.fill();
-        ctx.closePath();
-
-        if (ball.x - ball.radius < 0 || ball.x + ball.radius > canvas.width ||
-            ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
-            balls.splice(index, 1);
-        }
-    });
-}
-
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawShooter();
-    drawBalls();
-    requestAnimationFrame(animate);
-}
+const player = { x: canvas.width / 2, y: canvas.height / 2 };
 
 canvas.addEventListener('click', (event) => {
-    shootBall(event.clientX, event.clientY);
+    const angle = Math.atan2(event.clientY - player.y, event.clientX - player.x);
+    const speed = 5;
+    balls.push({
+        x: player.x,
+        y: player.y,
+        dx: Math.cos(angle) * speed,
+        dy: Math.sin(angle) * speed
+    });
 });
 
-animate();
+function update() {
+    for (let i = 0; i < balls.length; i++) {
+        balls[i].x += balls[i].dx;
+        balls[i].y += balls[i].dy;
+
+        if (balls[i].x < 0 || balls[i].x > canvas.width || balls[i].y < 0 || balls[i].y > canvas.height) {
+            balls.splice(i, 1);
+            i--;
+        }
+    }
+}
+
+function draw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    context.fillStyle = 'blue';
+    context.fillRect(player.x - 10, player.y - 10, 20, 20); // Draw player
+
+    context.fillStyle = 'red';
+    for (const ball of balls) {
+        context.beginPath();
+        context.arc(ball.x, ball.y, 5, 0, Math.PI * 2);
+        context.fill();
+    }
+}
+
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
