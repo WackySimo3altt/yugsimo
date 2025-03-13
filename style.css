@@ -1,3 +1,6 @@
+
+
+
 body, html {
     margin: 0;
     padding: 0;
@@ -7,5 +10,5 @@ body, html {
 
 canvas {
     display: block;
-    background-color: #000;
+    background-color: #000; /* This sets the canvas background to black */
 }
