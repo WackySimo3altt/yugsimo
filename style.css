@@ -1,14 +1,1 @@
 
-
-
-body, html {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    height: 100%;
-}
-
-canvas {
-    display: block;
-    background-color: #000; /* This sets the canvas background to black */
-}
