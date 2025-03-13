@@ -4,94 +4,110 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clicker Game</title>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding-top: 50px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Clicker Game</h1>
-    <p>Clicks: <span id="clicks">0</span></p>
-    <button id="clickButton">Click me!</button>
-    <h2>Upgrades</h2>
-    <button id="upgradeButton">Upgrade (Cost: <span id="upgradeCost">10</span>)</button>
-    <h2>Rebirth</h2>
-    <button id="rebirthButton">Rebirth (Cost: <span id="rebirthCost">1000</span>)</button>
-
-    <script src="game.js"></script>
+    <div class="container">
+        <div id="clicker-tile" class="clicker-tile" onclick="incrementClicks()">Click Me!</div>
+        <div id="click-count">0 Clicks</div>
+        <div id="upgrades">Upgrades: None</div>
+        <div id="rebirths">Rebirths: 0</div>
+        <div id="level">Level: 1</div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
-let clicks = 0;
-let clickValue = 1;
-let upgradeCost = 10;
-let rebirthCost = 1000;
-let isSpacePressed = false;
+body {
+    background-color: black;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
 
-const clicksDisplay = document.getElementById('clicks');
-const clickButton = document.getElementById('clickButton');
-const upgradeButton = document.getElementById('upgradeButton');
-const upgradeCostDisplay = document.getElementById('upgradeCost');
-const rebirthButton = document.getElementById('rebirthButton');
-const rebirthCostDisplay = document.getElementById('rebirthCost');
+.container {
+    text-align: center;
+}
 
-clickButton.addEventListener('click', () => {
-    clicks += clickValue;
-    updateDisplay();
-});
+#clicker-tile {
+    background-color: #444;
+    border: 2px solid #fff;
+    padding: 20px;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 10px;
+}
 
-upgradeButton.addEventListener('click', () => {
-    if (clicks >= upgradeCost) {
-        clicks -= upgradeCost;
-        clickValue *= 2;
-        upgradeCost *= 2;
-        updateDisplay();
+#clicker-tile:hover {
+    background-color: #555;
+}
+
+#click-count, #upgrades, #rebirths, #level {
+    margin: 10px 0;
+}
+let clickCount = 0;
+let upgrades = 0;
+let rebirths = 0;
+let level = 1;
+let autoClickerInterval = null;
+
+function incrementClicks(amount = 1) {
+    clickCount += amount;
+    document.getElementById('click-count').innerText = `${clickCount} Clicks`;
+    checkUpgrades();
+    checkRebirth();
+    checkLevelUp();
+}
+
+function startAutoClicker() {
+    if (!autoClickerInterval) {
+        autoClickerInterval = setInterval(() => incrementClicks(20), 50);
     }
-});
+}
 
-rebirthButton.addEventListener('click', () => {
-    if (clicks >= rebirthCost) {
-        clicks = 0;
-        clickValue = 1;
-        upgradeCost = 10;
-        rebirthCost *= 2;
-        updateDisplay();
+function stopAutoClicker() {
+    if (autoClickerInterval) {
+        clearInterval(autoClickerInterval);
+        autoClickerInterval = null;
     }
-});
+}
+
+function checkUpgrades() {
+    if (clickCount >= 100000 * (upgrades + 1)) {
+        upgrades++;
+        document.getElementById('upgrades').innerText = `Upgrades: ${upgrades}`;
+    }
+}
+
+function checkRebirth() {
+    if (clickCount >= 100000) {
+        clickCount = 0;
+        upgrades = 0;
+        rebirths++;
+        document.getElementById('click-count').innerText = `${clickCount} Clicks`;
+        document.getElementById('rebirths').innerText = `Rebirths: ${rebirths}`;
+        document.getElementById('upgrades').innerText = 'Upgrades: None';
+    }
+}
+
+function checkLevelUp() {
+    if (clickCount >= 1000000 * level) {
+        level++;
+        document.getElementById('level').innerText = `Level: ${level}`;
+    }
+}
 
 document.addEventListener('keydown', (event) => {
     if (event.code === 'Space') {
-        isSpacePressed = true;
+        startAutoClicker();
     }
 });
 
 document.addEventListener('keyup', (event) => {
     if (event.code === 'Space') {
-        isSpacePressed = false;
+        stopAutoClicker();
     }
 });
-
-function updateDisplay() {
-    clicksDisplay.textContent = clicks;
-    upgradeCostDisplay.textContent = upgradeCost;
-    rebirthCostDisplay.textContent = rebirthCost;
-}
-
-function autoClick() {
-    if (isSpacePressed) {
-        clicks += clickValue;
-        updateDisplay();
-    }
-    requestAnimationFrame(autoClick);
-}
-
-updateDisplay();
-autoClick();
