@@ -4,110 +4,57 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const zombieImage = new Image();
-zombieImage.src = 'zombie.png'; // You need to provide a zombie image
+const balls = [];
+const ballSpeed = 5;
 
-const bulletImage = new Image();
-bulletImage.src = 'bullet.png'; // You need to provide a bullet image
-
-let zombies = [];
-let bullets = [];
-
-class Zombie {
-    constructor(x, y) {
+class Ball {
+    constructor(x, y, dx, dy) {
         this.x = x;
         this.y = y;
-        this.width = 50;
-        this.height = 50;
-        this.health = 2;
+        this.dx = dx;
+        this.dy = dy;
+        this.radius = 10;
     }
 
     draw() {
-        ctx.drawImage(zombieImage, this.x, this.y, this.width, this.height);
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+        ctx.closePath();
     }
 
     update() {
-        this.x += (Math.random() - 0.5) * 2;
-        this.y += (Math.random() - 0.5) * 2;
+        this.x += this.dx;
+        this.y += this.dy;
+        this.draw();
     }
 }
 
-class Bullet {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.width = 10;
-        this.height = 10;
-    }
+function shootBall(event) {
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+    const angle = Math.atan2(mouseY - canvas.height / 2, mouseX - canvas.width / 2);
+    const dx = Math.cos(angle) * ballSpeed;
+    const dy = Math.sin(angle) * ballSpeed;
 
-    draw() {
-        ctx.drawImage(bulletImage, this.x, this.y, this.width, this.height);
-    }
-
-    update() {
-        this.y -= 5;
-    }
+    balls.push(new Ball(canvas.width / 2, canvas.height / 2, dx, dy));
 }
 
-function spawnZombie() {
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
-    zombies.push(new Zombie(x, y));
-}
-
-function shootBullet(x, y) {
-    bullets.push(new Bullet(x, y));
-}
-
-function checkCollisions() {
-    bullets.forEach((bullet, bulletIndex) => {
-        zombies.forEach((zombie, zombieIndex) => {
-            if (bullet.x < zombie.x + zombie.width &&
-                bullet.x + bullet.width > zombie.x &&
-                bullet.y < zombie.y + zombie.height &&
-                bullet.y + bullet.height > zombie.y) {
-                zombie.health--;
-                bullets.splice(bulletIndex, 1);
-                if (zombie.health <= 0) {
-                    zombies.splice(zombieIndex, 1);
-                    spawnZombie();
-                }
-            }
-        });
-    });
-}
-
-function gameLoop() {
+function animate() {
+    requestAnimationFrame(animate);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    zombies.forEach(zombie => {
-        zombie.update();
-        zombie.draw();
-    });
+    balls.forEach((ball, index) => {
+        ball.update();
 
-    bullets.forEach((bullet, index) => {
-        bullet.update();
-        bullet.draw();
-        if (bullet.y + bullet.height < 0) {
-            bullets.splice(index, 1);
+        // Remove ball if it goes out of the screen
+        if (ball.x + ball.radius < 0 || ball.x - ball.radius > canvas.width ||
+            ball.y + ball.radius < 0 || ball.y - ball.radius > canvas.height) {
+            balls.splice(index, 1);
         }
     });
-
-    checkCollisions();
-
-    requestAnimationFrame(gameLoop);
 }
 
-canvas.addEventListener('click', (event) => {
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    shootBullet(x, y);
-});
-
-// Initial spawn
-for (let i = 0; i < 5; i++) {
-    spawnZombie();
-}
-
-gameLoop();
+canvas.addEventListener('click', shootBall);
+animate();
