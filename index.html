@@ -1,1 +1,107 @@
-<body style="margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:#000"><div style="width:100px;height:100px;border-radius:50%;background:white url('https://upload.wikimedia.org/wikipedia/commons/1/14/Ryan_Reynolds.jpg') center/cover;display:flex;align-items:center;justify-content:center;color:#000;font-size:24px;cursor:pointer" onclick="this.innerText=+this.innerText+1">0</div></body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clicker Game</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    #name-input { margin-top: 20px; }
+    #leaderboard { margin-top: 20px; font-size: 18px; }
+    button { background: black; color: white; border: none; padding: 5px 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="name-input">
+    <h1>Enter Your Name</h1>
+    <input type="text" id="player-name" placeholder="Your Name">
+    <button onclick="startGame()">Start Game</button>
+  </div>
+  <div id="game" style="display:none">
+    <div style="font-size:24px;margin-bottom:20px">Score: <span id="score">0</span></div>
+    <button style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100px;height:100px;border-radius:50%;cursor:pointer" onclick="handleClick()">Click</button>
+    <div style="position:absolute;top:70%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:10px">
+      <button onclick="buyUpgrade(10, 1)">Upgrade (+1) - 10</button>
+      <button onclick="buyUpgrade(100, 10)">Upgrade (+10) - 100</button>
+      <button onclick="buyUpgrade(1000, 50)">Upgrade (+50) - 1,000</button>
+      <button onclick="buyUpgrade(10000, 250)">Upgrade (+250) - 10,000</button>
+      <button onclick="buyUpgrade(100000, 500)">Upgrade (+500) - 100,000</button>
+      <button onclick="buyUpgrade(1000000, 750)">Upgrade (+750) - 1,000,000</button>
+    </div>
+  </div>
+  <div id="leaderboard">
+    <h2>Leaderboard</h2>
+    <ol id="leaderboard-list"></ol>
+  </div>
+  <script>
+    let score = 0, clickPower = 1, playerName = '';
+    const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+    function startGame() {
+      playerName = document.getElementById('player-name').value.trim();
+      if (!playerName) return alert('Please enter your name!');
+      document.getElementById('name-input').style.display = 'none';
+      document.getElementById('game').style.display = 'block';
+      updateLeaderboard();
+    }
+
+    function updateScore() {
+      document.getElementById('score').innerText = score;
+    }
+
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.innerText = '❤️';
+      heart.style.position = 'fixed';
+      heart.style.top = '0';
+      heart.style.left = `${Math.random() * window.innerWidth}px`;
+      heart.style.fontSize = '24px';
+      heart.style.transition = 'top 0.5s linear';
+      document.body.appendChild(heart);
+      setTimeout(() => { heart.style.top = `${window.innerHeight}px` }, 10);
+      setTimeout(() => heart.remove(), 510);
+    }
+
+    function handleClick() {
+      score += clickPower;
+      updateScore();
+      createHeart();
+    }
+
+    function buyUpgrade(cost, power) {
+      if (score >= cost) {
+        clickPower += power;
+        score -= cost;
+        updateScore();
+      }
+    }
+
+    function updateLeaderboard() {
+      leaderboard.push({ name: playerName, score: score });
+      leaderboard.sort((a, b) => b.score - a.score);
+      leaderboard.splice(5); // Keep only top 5
+      localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+      const leaderboardList = document.getElementById('leaderboard-list');
+      leaderboardList.innerHTML = leaderboard.map((entry, index) => `
+        <li>${index + 1}. ${entry.name} - ${entry.score}</li>
+      `).join('');
+    }
+
+    let spaceInterval;
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !spaceInterval) {
+        spaceInterval = setInterval(handleClick, 50);
+      }
+    });
+    document.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        clearInterval(spaceInterval);
+        spaceInterval = null;
+      }
+    });
+
+    // Show leaderboard on load
+    updateLeaderboard();
+  </script>
+</body>
+</html>
