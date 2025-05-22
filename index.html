@@ -1,1 +1,217 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Clicker Game</title><style>body{font-family:Arial,sans-serif;text-align:center;display:flex;justify-content:space-between;padding:20px;background:white;color:black}#name-input{margin-top:20px}#leaderboard{width:20%;margin-left:20px;font-size:18px;text-align:left;background:black;color:white;padding:10px;border-radius:10px}button{background:black;color:white;border:none;padding:5px 10px;cursor:pointer}#game{flex-grow:1}#password-container{position:fixed;top:10px;right:10px;display:flex;gap:5px;align-items:center}</style></head><body><div id="name-input"><h1>Enter Your Name</h1><input type="text" id="player-name" placeholder="Your Name"><button onclick="startGame()">Start Game</button></div><div id="game" style="display:none"><div style="font-size:24px;margin-bottom:20px">Score: <span id="score">0</span></div><button style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100px;height:100px;border-radius:50%;cursor:pointer" onclick="handleClick()">Click</button><div style="position:absolute;top:70%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:10px"><button id="upgrade1" onclick="buyUpgrade(0)">Upgrade (+1) - 10</button><button id="upgrade2" onclick="buyUpgrade(1)">Upgrade (+10) - 100</button><button id="upgrade3" onclick="buyUpgrade(2)">Upgrade (+50) - 1,000</button><button id="upgrade4" onclick="buyUpgrade(3)">Upgrade (+250) - 10,000</button><button id="upgrade5" onclick="buyUpgrade(4)">Upgrade (+500) - 100,000</button><button id="upgrade6" onclick="buyUpgrade(5)">Upgrade (+750) - 1,000,000</button><button id="stage2-upgrade" style="display:none" onclick="buyStage2()">Stage 2 (2.5x Cost) - 100,000,000</button></div></div><div id="password-container"><input type="text" id="password-input" placeholder="Enter Password"><button onclick="usePassword()">Submit</button></div><div id="leaderboard"><h2>Leaderboard</h2><ol id="leaderboard-list"></ol></div><script>let score=0,clickPower=1,playerName='',isStage2=false;const leaderboard=JSON.parse(localStorage.getItem('leaderboard'))||[];const upgrades=[{cost:10,power:1},{cost:100,power:10},{cost:1000,power:50},{cost:10000,power:250},{cost:100000,power:500},{cost:1000000,power:750}];function startGame(){playerName=document.getElementById('player-name').value.trim();if(!playerName)return alert('Please enter your name!');if(leaderboard.some(entry=>entry.name===playerName))return alert('Name already exists!');document.getElementById('name-input').style.display='none';document.getElementById('game').style.display='block';updateLeaderboard()}function updateScore(){document.getElementById('score').innerText=score;if(score>=100000000&&!isStage2)document.getElementById('stage2-upgrade').style.display='block'}function createHeart(){const heart=document.createElement('div');heart.innerText='❤️';heart.style.position='fixed';heart.style.top='0';heart.style.left=`${Math.random()*window.innerWidth}px`;heart.style.fontSize='24px';heart.style.transition='top 0.5s linear';document.body.appendChild(heart);setTimeout(()=>{heart.style.top=`${window.innerHeight}px`},10);setTimeout(()=>heart.remove(),510)}function handleClick(){score+=clickPower;updateScore();createHeart()}function buyUpgrade(index){const upgrade=upgrades[index];if(score>=upgrade.cost){clickPower+=upgrade.power;score-=upgrade.cost;upgrade.cost*=2.5;updateScore();updateUpgradeButtons()}}function buyStage2(){if(score>=100000000){isStage2=true;upgrades.forEach(upgrade=>upgrade.cost*=2.5);updateUpgradeButtons();document.body.style.backgroundColor='black';document.body.style.color='white';document.querySelectorAll('button').forEach(button=>{button.style.backgroundColor='white';button.style.color='black'});document.getElementById('leaderboard').style.backgroundColor='white';document.getElementById('leaderboard').style.color='black';score-=100000000;updateScore()}}function updateUpgradeButtons(){document.getElementById('upgrade1').innerText=`Upgrade (+1) - ${upgrades[0].cost}`;document.getElementById('upgrade2').innerText=`Upgrade (+10) - ${upgrades[1].cost}`;document.getElementById('upgrade3').innerText=`Upgrade (+50) - ${upgrades[2].cost}`;document.getElementById('upgrade4').innerText=`Upgrade (+250) - ${upgrades[3].cost}`;document.getElementById('upgrade5').innerText=`Upgrade (+500) - ${upgrades[4].cost}`;document.getElementById('upgrade6').innerText=`Upgrade (+750) - ${upgrades[5].cost}`}function updateLeaderboard(){leaderboard.push({name:playerName,score:score});leaderboard.sort((a,b)=>b.score-a.score);leaderboard.splice(5);localStorage.setItem('leaderboard',JSON.stringify(leaderboard));const leaderboardList=document.getElementById('leaderboard-list');leaderboardList.innerHTML=leaderboard.map((entry,index)=>`<li>${index+1}. ${entry.name} - ${entry.score}</li>`).join('')}function usePassword(){const password=document.getElementById('password-input').value.trim();if(password==="SIMO111"){score+=100000000000;updateScore();alert('Password accepted! You gained 100,000,000,000 clicks!')}else{alert('Invalid password!')}}let spaceInterval;document.addEventListener('keydown',(e)=>{if(e.code==='Space'&&!spaceInterval){spaceInterval=setInterval(handleClick,50)}});document.addEventListener('keyup',(e)=>{if(e.code==='Space'){clearInterval(spaceInterval);spaceInterval=null}});updateLeaderboard();</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Clicker Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+        #game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #click-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 24px;
+            border: none;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: transform 0.1s;
+        }
+        #click-button:active {
+            transform: scale(0.95);
+            background-color: #45a049;
+        }
+        #stats {
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .upgrade {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .upgrade:hover {
+            background-color: #0b7dda;
+        }
+        .upgrade:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #achievements {
+            margin-top: 20px;
+            text-align: left;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .achievement {
+            opacity: 0.5;
+            margin: 5px 0;
+        }
+        .achievement.unlocked {
+            opacity: 1;
+            font-weight: bold;
+            color: #FF9800;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Ultimate Clicker</h1>
+        <div id="stats">
+            <p>Total Clicks: <span id="total-clicks">0</span></p>
+            <p>CPS: <span id="cps">100</span></p>
+            <p>Click Power: <span id="click-power">1</span></p>
+        </div>
+        
+        <button id="click-button">CLICK ME!</button>
+        
+        <h2>Upgrades</h2>
+        <div id="upgrades">
+            <button class="upgrade" id="upgrade-click-power" data-cost="100" data-power="1">
+                Better Cursor (+1 power) - Cost: 100
+            </button>
+            <button class="upgrade" id="upgrade-auto-clicker" data-cost="500" data-cps="50">
+                Auto Clicker (+50 CPS) - Cost: 500
+            </button>
+            <button class="upgrade" id="upgrade-mega-clicker" data-cost="2000" data-cps="200">
+                Mega Clicker (+200 CPS) - Cost: 2000
+            </button>
+            <button class="upgrade" id="upgrade-super-clicker" data-cost="10000" data-cps="1000">
+                Super Clicker (+1000 CPS) - Cost: 10000
+            </button>
+            <button class="upgrade" id="upgrade-ultra-clicker" data-cost="50000" data-cps="5000">
+                Ultra Clicker (+5000 CPS) - Cost: 50000
+            </button>
+        </div>
+        
+        <div id="achievements">
+            <h2>Achievements</h2>
+            <div class="achievement" id="ach-1000">Reach 1,000 clicks</div>
+            <div class="achievement" id="ach-10000">Reach 10,000 clicks</div>
+            <div class="achievement" id="ach-100000">Reach 100,000 clicks</div>
+            <div class="achievement" id="ach-100cps">Reach 100 CPS</div>
+            <div class="achievement" id="ach-1000cps">Reach 1,000 CPS</div>
+            <div class="achievement" id="ach-10000cps">Reach 10,000 CPS</div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let totalClicks = 0;
+        let cps = 100; // Starting CPS
+        let clickPower = 1;
+        let autoClickers = 0;
+        
+        // DOM elements
+        const clickButton = document.getElementById('click-button');
+        const totalClicksDisplay = document.getElementById('total-clicks');
+        const cpsDisplay = document.getElementById('cps');
+        const clickPowerDisplay = document.getElementById('click-power');
+        const upgrades = document.querySelectorAll('.upgrade');
+        
+        // Initialize the game
+        function init() {
+            updateDisplays();
+            setupEventListeners();
+            startAutoClicker();
+        }
+        
+        // Update all displays
+        function updateDisplays() {
+            totalClicksDisplay.textContent = formatNumber(totalClicks);
+            cpsDisplay.textContent = formatNumber(cps);
+            clickPowerDisplay.textContent = formatNumber(clickPower);
+            
+            // Update upgrade buttons
+            upgrades.forEach(upgrade => {
+                const cost = parseInt(upgrade.getAttribute('data-cost'));
+                upgrade.disabled = totalClicks < cost;
+                upgrade.textContent = `${upgrade.textContent.split(' - ')[0]} - Cost: ${formatNumber(cost)}`;
+            });
+            
+            // Check achievements
+            checkAchievements();
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Main click button
+            clickButton.addEventListener('click', () => {
+                totalClicks += clickPower;
+                updateDisplays();
+            });
+            
+            // Upgrade buttons
+            upgrades.forEach(upgrade => {
+                upgrade.addEventListener('click', () => {
+                    const cost = parseInt(upgrade.getAttribute('data-cost'));
+                    if (totalClicks >= cost) {
+                        totalClicks -= cost;
+                        
+                        if (upgrade.id === 'upgrade-click-power') {
+                            const power = parseInt(upgrade.getAttribute('data-power'));
+                            clickPower += power;
+                        } else {
+                            const cpsBoost = parseInt(upgrade.getAttribute('data-cps'));
+                            cps += cpsBoost;
+                        }
+                        
+                        // Increase cost for next purchase
+                        upgrade.setAttribute('data-cost', Math.floor(cost * 1.5));
+                        
+                        updateDisplays();
+                    }
+                });
+            });
+        }
+        
+        // Auto-clicker functionality
+        function startAutoClicker() {
+            setInterval(() => {
+                totalClicks += cps / 10; // Update 10 times per second for smoother progression
+                updateDisplays();
+            }, 100);
+        }
+        
+        // Check and unlock achievements
+        function checkAchievements() {
+            // Total clicks achievements
+            if (totalClicks >= 1000) document.getElementById('ach-1000').classList.add('unlocked');
+            if (totalClicks >= 10000) document.getElementById('ach-10000').classList.add('unlocked');
+            if (totalClicks >= 100000) document.getElementById('ach-100000').classList.add('unlocked');
+            
+            // CPS achievements
+            if (cps >= 100) document.getElementById('ach-100cps').classList.add('unlocked');
+            if (cps >= 1000) document.getElementById('ach-1000cps').classList.add('unlocked');
+            if (cps >= 10000) document.getElementById('ach-10000cps').classList.add('unlocked');
+        }
+        
+        // Format large numbers with commas
+        function formatNumber(num) {
+            return Math.floor(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        // Start the game
+        init();
+    </script>
+</body>
+</html>
